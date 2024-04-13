@@ -45,12 +45,12 @@ const Index = () => {
   const handleSearch = async (e) => {
     e.preventDefault();
     try {
-      const response = await fetch(`/api/lostIds/${searchIdNumber}`);
+      const response = await fetch(`/api/lostIds/search/${searchIdNumber}`);
       if (response.ok) {
         const data = await response.json();
         setSearchResult(data);
       } else {
-        setSearchResult(null);
+        setSearchResult({ found: false });
       }
     } catch (error) {
       console.error("Error searching for ID:", error);
@@ -94,7 +94,7 @@ const Index = () => {
               </Button>
             </HStack>
           </form>
-          {searchResult && <Box marginTop="4">{searchResult.found ? <Text>The ID is available and can be picked up at {searchResult.location}.</Text> : <Text>Sorry, please try again later.</Text>}</Box>}
+          {searchResult && <Box marginTop="4">{searchResult.found ? <Text>The ID is available and can be picked up at {searchResult.location}.</Text> : <Text>Sorry, the ID was not found. Please try again later.</Text>}</Box>}
         </Box>
       </VStack>
     </Box>
