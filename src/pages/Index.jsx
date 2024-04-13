@@ -94,7 +94,17 @@ const Index = () => {
               </Button>
             </HStack>
           </form>
-          {searchResult && <Box marginTop="4">{searchResult.found ? <Text>The ID is available and can be picked up at {searchResult.location}.</Text> : <Text>Sorry, the ID was not found. Please try again later.</Text>}</Box>}
+          {searchResult && (
+            <Box marginTop="4">
+              {searchResult.found ? (
+                <Text>
+                  The ID is available and can be picked up at <strong>{searchResult.location}</strong>.
+                </Text>
+              ) : (
+                <Text>Sorry, the ID was not found. Please try again later.</Text>
+              )}
+            </Box>
+          )}
         </Box>
       </VStack>
     </Box>
