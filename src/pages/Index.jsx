@@ -1,5 +1,6 @@
 import React, { useState } from "react";
-import { Box, Heading, Input, Button, Text, VStack, HStack, Divider, useToast } from "@chakra-ui/react";
+import { Box, Heading, Input, Button, Text, VStack, HStack, Divider, useToast, useDisclosure, Modal, ModalOverlay, ModalContent, ModalHeader, ModalCloseButton, ModalBody } from "@chakra-ui/react";
+import SearchResultModal from "../components/SearchResultModal";
 
 const Index = () => {
   const [name, setName] = useState("");
@@ -7,6 +8,7 @@ const Index = () => {
   const [location, setLocation] = useState("");
   const [searchIdNumber, setSearchIdNumber] = useState("");
   const [searchResult, setSearchResult] = useState(null);
+  const { isOpen, onOpen, onClose } = useDisclosure();
   const toast = useToast();
 
   const handleSubmit = async (e) => {
@@ -49,8 +51,24 @@ const Index = () => {
       if (response.ok) {
         const data = await response.json();
         setSearchResult(data);
+        if (data.found) {
+          onOpen();
+        } else {
+          toast({
+            title: "ID not found",
+            description: "Sorry, the ID was not found. Please try again later.",
+            status: "error",
+            duration: 3000,
+            isClosable: true,
+          });
+        }
       } else {
-        setSearchResult({ found: false });
+        toast({
+          title: "Error searching for ID",
+          status: "error",
+          duration: 3000,
+          isClosable: true,
+        });
       }
     } catch (error) {
       console.error("Error searching for ID:", error);
@@ -94,17 +112,16 @@ const Index = () => {
               </Button>
             </HStack>
           </form>
-          {searchResult && (
-            <Box marginTop="4">
-              {searchResult.found ? (
-                <Text>
-                  The ID is available and can be picked up at <strong>{searchResult.location}</strong>.
-                </Text>
-              ) : (
-                <Text>Sorry, the ID was not found. Please try again later.</Text>
-              )}
-            </Box>
-          )}
+          <Modal isOpen={isOpen} onClose={onClose}>
+            <ModalOverlay />
+            <ModalContent>
+              <ModalHeader>Search Result</ModalHeader>
+              <ModalCloseButton />
+              <ModalBody>
+                <SearchResultModal location={searchResult?.location} />
+              </ModalBody>
+            </ModalContent>
+          </Modal>
         </Box>
       </VStack>
     </Box>
