@@ -1,8 +1,21 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Box, Heading, Input, Button, Text, VStack, HStack, Divider, useToast, useDisclosure, Modal, ModalOverlay, ModalContent, ModalHeader, ModalCloseButton, ModalBody } from "@chakra-ui/react";
 import SearchResultModal from "../components/SearchResultModal";
 
+// Mock database
+let mockDatabase = [];
+
 const Index = () => {
+  useEffect(() => {
+    const storedData = localStorage.getItem("mockDatabase");
+    if (storedData) {
+      mockDatabase = JSON.parse(storedData);
+    }
+  }, []);
+
+  useEffect(() => {
+    localStorage.setItem("mockDatabase", JSON.stringify(mockDatabase));
+  }, [mockDatabase]);
   const [name, setName] = useState("");
   const [idNumber, setIdNumber] = useState("");
   const [location, setLocation] = useState("");
@@ -11,67 +24,36 @@ const Index = () => {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const toast = useToast();
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = (e) => {
     e.preventDefault();
-    try {
-      const response = await fetch("/api/lostIds", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ name, idNumber, location }),
-      });
-      if (response.ok) {
-        toast({
-          title: "ID details uploaded.",
-          status: "success",
-          duration: 3000,
-          isClosable: true,
-        });
-        setName("");
-        setIdNumber("");
-        setLocation("");
-      } else {
-        toast({
-          title: "Failed to upload ID details.",
-          status: "error",
-          duration: 3000,
-          isClosable: true,
-        });
-      }
-    } catch (error) {
-      console.error("Error uploading ID details:", error);
-    }
+
+    mockDatabase.push({ name, idNumber, location });
+    toast({
+      title: "ID details uploaded.",
+      status: "success",
+      duration: 3000,
+      isClosable: true,
+    });
+    setName("");
+    setIdNumber("");
+    setLocation("");
   };
 
-  const handleSearch = async (e) => {
+  const handleSearch = (e) => {
     e.preventDefault();
-    try {
-      const response = await fetch(`/api/lostIds/search/${searchIdNumber}`);
-      if (response.ok) {
-        const data = await response.json();
-        setSearchResult(data);
-        if (data.found) {
-          onOpen();
-        } else {
-          toast({
-            title: "ID not found",
-            description: "Sorry, the ID was not found. Please try again later.",
-            status: "error",
-            duration: 3000,
-            isClosable: true,
-          });
-        }
-      } else {
-        toast({
-          title: "Error searching for ID",
-          status: "error",
-          duration: 3000,
-          isClosable: true,
-        });
-      }
-    } catch (error) {
-      console.error("Error searching for ID:", error);
+
+    const foundId = mockDatabase.find((item) => item.idNumber === searchIdNumber);
+    if (foundId) {
+      setSearchResult({ found: true, location: foundId.location });
+      onOpen();
+    } else {
+      toast({
+        title: "ID not found",
+        description: "Sorry, the ID was not found. Please try again later.",
+        status: "error",
+        duration: 3000,
+        isClosable: true,
+      });
     }
   };
 
