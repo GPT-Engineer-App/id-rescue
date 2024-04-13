@@ -1,21 +1,31 @@
 import React, { useState, useEffect } from "react";
 import { Box, Heading, Input, Button, Text, VStack, HStack, Divider, useToast, useDisclosure, Modal, ModalOverlay, ModalContent, ModalHeader, ModalCloseButton, ModalBody } from "@chakra-ui/react";
 import SearchResultModal from "../components/SearchResultModal";
+import { useNavigate } from "react-router-dom";
 
-// Mock database
 let mockDatabase = [];
 
 const Index = () => {
+  const navigate = useNavigate();
+  const [currentUser, setCurrentUser] = useState(null);
+
   useEffect(() => {
     const storedData = localStorage.getItem("mockDatabase");
     if (storedData) {
       mockDatabase = JSON.parse(storedData);
     }
-  }, []);
+    const user = JSON.parse(localStorage.getItem("currentUser"));
+    if (!user) {
+      navigate("/login");
+    } else {
+      setCurrentUser(user);
+    }
+  }, [navigate]);
 
   useEffect(() => {
     localStorage.setItem("mockDatabase", JSON.stringify(mockDatabase));
   }, [mockDatabase]);
+
   const [name, setName] = useState("");
   const [idNumber, setIdNumber] = useState("");
   const [location, setLocation] = useState("");
@@ -64,21 +74,23 @@ const Index = () => {
       </Heading>
 
       <VStack spacing="6" align="stretch">
-        <Box>
-          <Heading as="h2" size="lg" marginBottom="4">
-            Upload Lost ID Details
-          </Heading>
-          <form onSubmit={handleSubmit}>
-            <VStack spacing="4">
-              <Input placeholder="Name" value={name} onChange={(e) => setName(e.target.value)} required />
-              <Input placeholder="ID Number" value={idNumber} onChange={(e) => setIdNumber(e.target.value)} required />
-              <Input placeholder="Location" value={location} onChange={(e) => setLocation(e.target.value)} required />
-              <Button type="submit" colorScheme="blue">
-                Upload
-              </Button>
-            </VStack>
-          </form>
-        </Box>
+        {currentUser?.accountType === "admin" && (
+          <Box>
+            <Heading as="h2" size="lg" marginBottom="4">
+              Upload Lost ID Details
+            </Heading>
+            <form onSubmit={handleSubmit}>
+              <VStack spacing="4">
+                <Input placeholder="Name" value={name} onChange={(e) => setName(e.target.value)} required />
+                <Input placeholder="ID Number" value={idNumber} onChange={(e) => setIdNumber(e.target.value)} required />
+                <Input placeholder="Location" value={location} onChange={(e) => setLocation(e.target.value)} required />
+                <Button type="submit" colorScheme="blue">
+                  Upload
+                </Button>
+              </VStack>
+            </form>
+          </Box>
+        )}
 
         <Divider />
 
